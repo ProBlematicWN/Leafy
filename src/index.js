@@ -5,6 +5,16 @@ const path = require('path');
 const screenshotsDir = path.join(__dirname, 'screenshots');
 const screenshot = require('screenshot-desktop');
 
+var fs = require('fs');
+var util = require('util');
+var log_file = fs.createWriteStream(__dirname + '/debug.log', {flags : 'w'});
+var log_stdout = process.stdout;
+
+console.log = function(d) { //
+  log_file.write(util.format(d) + '\n');
+  log_stdout.write(util.format(d) + '\n');
+};
+
 let isFunctionEnabled = false;
 
 //const fs = require('fs');
@@ -58,7 +68,7 @@ client.on('messageCreate', (msg) => {
     if ((msg.content.toLowerCase().includes("@red")) && (msg.author.username === 'fijiwj')) {
         msg.reply(process.env.RED_PING) 
     }
-
+    
     if (phrases.some(phrase => msg.content.toLowerCase().includes(phrase.toLowerCase())) && msg.author.username === 'lordkekyshka') {
         msg.reply(process.env.BEGGAR);
     }

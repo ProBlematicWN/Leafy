@@ -1,3 +1,4 @@
 .env
 src/screenshots
 src/output.js
+src/test.js
