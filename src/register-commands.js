@@ -11,6 +11,10 @@ const commands = [
         description: 'а сколько время у проба?',
     },
     {
+        name: 'toggle-screenshot',
+        description: 'Переключает доступность команды /screenbread',
+    },
+    {
         name: 'add',
         description: 'Adds two numbers',
         options: [

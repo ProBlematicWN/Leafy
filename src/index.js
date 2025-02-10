@@ -4,6 +4,9 @@ const getVladivostokTime = require('./funcs');
 const path = require('path');
 const screenshotsDir = path.join(__dirname, 'screenshots');
 const screenshot = require('screenshot-desktop');
+
+let isFunctionEnabled = false;
+
 //const fs = require('fs');
 
 function takeScreenshot(filename) {
@@ -29,12 +32,36 @@ const client = new Client({
     ]
 });
 
+const phrases = [
+    "подарите мне",
+    "подари мне",
+    "купите мне",
+    "купи мне",
+];
+
 client.on('ready', (c) => {
     console.log(`${c.user.tag} is online`);
 });
 
 client.on('messageCreate', (msg) => {
+    const hasProb = msg.content.toLowerCase().includes("зкщи");
     console.log(`${msg.author.username} - ${msg.content}`)
+
+    if (msg.author.bot) {
+        return;
+      }
+
+    if ((msg.content.toLowerCase().includes("кув")) && (msg.author.username === 'fijiwj')) {
+        msg.reply(process.env.RED_PING) 
+    }
+
+    if ((msg.content.toLowerCase().includes("@red")) && (msg.author.username === 'fijiwj')) {
+        msg.reply(process.env.RED_PING) 
+    }
+
+    if (phrases.some(phrase => msg.content.toLowerCase().includes(phrase.toLowerCase())) && msg.author.username === 'lordkekyshka') {
+        msg.reply(process.env.BEGGAR);
+    }
 })
 
 client.on('interactionCreate', (interaction) => {
@@ -57,25 +84,41 @@ client.on('interactionCreate', (interaction) => {
         interaction.reply(`The summ is ${num1 + num2}`)
     }
 
+    if ((interaction.commandName == 'toggle-screenshot') && !(interaction.user.username === 'fijiwj')) {
+        interaction.reply(`<:stop:1338512349455319111> Недостаточно прав для выполнения этой функции`);
+    }
+
+    if ((interaction.commandName == 'toggle-screenshot') && (interaction.user.username === 'fijiwj')) {
+        isFunctionEnabled = !isFunctionEnabled;
+        interaction.reply(`Функция ${isFunctionEnabled ? 'включена' : 'выключена'}.`);
+    }
+
+
     if (interaction.commandName === 'screenbread') {
-
-        const timestamp = Date.now();
-        const filename = path.join(screenshotsDir, `screenshot-${timestamp}.png`);
-
-        takeScreenshot(filename)
-            .then(() => {
-                interaction.reply({content: `${getVladivostokTime()}`, files: [filename] })
-                    .then(() => {
-                        // fs.unlinkSync(filename);
-                    })
-                    .catch((error) => {
-                        console.error('Ошибка при отправке файла:', error);
-                    });
-            })
-            .catch((error) => {
-                console.error('Ошибка при создании скриншота:', error);
-                interaction.reply({ content: 'Произошла ошибка при создании скриншота!', flags: 64 });
-            });
+        if (isFunctionEnabled) {
+            const timestamp = Date.now();
+            const filename = path.join(screenshotsDir, `screenshot-${timestamp}.png`);
+            const slicetime = timestamp.toString().slice(0, 10);
+        
+            takeScreenshot(filename)
+                .then(() => {
+                    //interaction.reply({content: `${getVladivostokTime()}`, files: [filename] })
+                    interaction.reply({content: `<t:${slicetime}:f> `, files: [filename] })
+                        .then(() => {
+                            // fs.unlinkSync(filename);
+                        })
+                        .catch((error) => {
+                            console.error('Ошибка при отправке файла:', error);
+                        });
+                })
+                .catch((error) => {
+                    console.error('Ошибка при создании скриншота:', error);
+                    interaction.reply({ content: 'Произошла ошибка при создании скриншота!', flags: 64 });
+                });
+        }
+        if (!isFunctionEnabled) {
+            interaction.reply('<:stop:1338512349455319111> Функция недоступна т.к. выключена ')
+        }
     }
 })
 
