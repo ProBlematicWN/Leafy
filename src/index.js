@@ -72,6 +72,19 @@ client.on('messageCreate', (msg) => {
     if (phrases.some(phrase => msg.content.toLowerCase().includes(phrase.toLowerCase())) && msg.author.username === 'lordkekyshka') {
         msg.reply(process.env.BEGGAR);
     }
+
+	if ((msg.content.toLowerCase().includes("vt.tiktok.com")) && (msg.author.username === 'fijiwj' )) {
+	console.log(msg.content.slice(13))
+	const ttstart = (`https://tfx`)
+	msg.reply(ttstart + `` + msg.content.slice(13))
+	}
+
+	if ((msg.content.toLowerCase().includes("x.com")) && (msg.author.username === 'fijiwj' )) {
+        console.log(msg.content.slice(9))
+        const ttstart = (`https://fxtwitter`)
+        msg.reply(ttstart + `` + msg.content.slice(9))
+        }
+
 })
 
 client.on('interactionCreate', (interaction) => {
