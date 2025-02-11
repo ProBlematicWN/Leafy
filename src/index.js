@@ -4,20 +4,18 @@ const getVladivostokTime = require('./funcs');
 const path = require('path');
 const screenshotsDir = path.join(__dirname, 'screenshots');
 const screenshot = require('screenshot-desktop');
+const getRandomWord = require('./funcs');
 
 var fs = require('fs');
-var util = require('util');
-var log_file = fs.createWriteStream(__dirname + '/debug.log', {flags : 'w'});
-var log_stdout = process.stdout;
-
-console.log = function(d) { //
-  log_file.write(util.format(d) + '\n');
-  log_stdout.write(util.format(d) + '\n');
-};
-
-let isFunctionEnabled = false;
+let isFunctionEnabled = true;
 
 //const fs = require('fs');
+
+function getRandomInt(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+  }
 
 function takeScreenshot(filename) {
     return new Promise((resolve, reject) => {
@@ -59,12 +57,21 @@ client.on('ready', (c) => {
 });
 
 client.on('messageCreate', (msg) => {
-    const hasProb = msg.content.toLowerCase().includes("зкщи");
+
     console.log(`${msg.author.username} - ${msg.content}`)
+    fs.appendFileSync('src/debug.log', (`${msg.author.username} - ${msg.content}`)+`\n`);
 
     if (msg.author.bot) {
         return;
-      }
+    }
+
+    if (msg.content === "") {
+        return;
+    }
+
+    if ((msg.content != "l.b") || (msg.author.username != "Leafy"))  {
+        fs.appendFileSync('src/data.log', msg.content + `\n`);
+    }
 
     if ((msg.content.toLowerCase().includes("кув")) && (msg.author.username === 'fijiwj')) {
         msg.reply(process.env.RED_PING) 
@@ -122,14 +129,31 @@ client.on('interactionCreate', (interaction) => {
         interaction.reply('test')
     }
 
+    if (interaction.commandName == 'yap') {
+        const amount = interaction.options.get('amount').value
+        if (amount > 6) {
+            interaction.reply('слишком много слов выбрано')
+            return;
+        }
+        getRandomWord(amount) // Укажите количество слов (по умолчанию 1)
+            .then((words) => {
+                interaction.reply(words);
+            })
+            .catch((error) => {
+                console.error('Ошибка:', error);
+            });
+    }
+
     if (interaction.commandName == 'time') {
-        interaction.reply(`сейчас у проба ${getVladivostokTime()}`)
+        const timestamp = Date.now();
+        const slicetime = timestamp.toString().slice(0, 10);
+        //interaction.reply(`сейчас у проба ${getVladivostokTime()}`)
+        interaction.reply(`сейчас у проба <t:${slicetime}:f>`)
     }
 
     if (interaction.commandName == 'add') {
         const num1 = interaction.options.get('first-number').value
         const num2 = interaction.options.get('second-number').value
-        
         interaction.reply(`The summ is ${num1 + num2}`)
     }
 
@@ -141,7 +165,6 @@ client.on('interactionCreate', (interaction) => {
         isFunctionEnabled = !isFunctionEnabled;
         interaction.reply(`Функция ${isFunctionEnabled ? 'включена' : 'выключена'}.`);
     }
-
 
     if (interaction.commandName === 'screenbread') {
         if (isFunctionEnabled) {

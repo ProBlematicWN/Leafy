@@ -7,7 +7,7 @@ const saveFolder = path.join(__dirname, 'screenshot-project');
 async function takeScreenshot() {
     try {
         const img = await screenshot();
-        const filePath = path.join(saveFolder, `screenshot-${timestamp}.png`);
+        const filePath = path.join(saveFolder, `screenshot.png`);
 
         fs.writeFileSync(filePath, img);
         console.log(`Скриншот сохранен: ${filePath}`);
