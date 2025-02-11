@@ -10,3 +10,4 @@
 - Convert Twitter and TikTok links to better one with discord embed supported
 - Mention your friends with wrong keyboard layout
 - Troll your friend (the "beggar" one) with beggar-emoji picture
+- Yapping based on YOUR server messages
