@@ -49,6 +49,11 @@ const phrases = [
     "купи мне",
 ];
 
+const authorizedUsers = [
+    "fijiwj",
+    "16x9",
+]
+
 client.on('ready', (c) => {
     console.log(`${c.user.tag} is online`);
 });
@@ -73,17 +78,38 @@ client.on('messageCreate', (msg) => {
         msg.reply(process.env.BEGGAR);
     }
 
-	if ((msg.content.toLowerCase().includes("vt.tiktok.com")) && (msg.author.username === 'fijiwj' )) {
-	console.log(msg.content.slice(13))
-	const ttstart = (`https://tfx`)
-	msg.reply(ttstart + `` + msg.content.slice(13))
-	}
+    if (authorizedUsers.some(user => msg.author.username.toLowerCase().includes(user.toLowerCase())) && msg.content.toLowerCase().includes("x.com")) {
+        const xstart = (`https://fxtwitter`)
+        msg.channel.send(msg.author.username + `: ` + xstart + `` + msg.content.slice(9))
+        msg.delete(100)
+    };
 
-	if ((msg.content.toLowerCase().includes("x.com")) && (msg.author.username === 'fijiwj' )) {
-        console.log(msg.content.slice(9))
-        const ttstart = (`https://fxtwitter`)
-        msg.reply(ttstart + `` + msg.content.slice(9))
+    if (authorizedUsers.some(user => msg.author.username.toLowerCase().includes(user.toLowerCase())) && msg.content.toLowerCase().includes("vt.tiktok.com")) {
+        const ttstart = (`https://tfx`)
+        msg.channel.send(msg.author.username + `: ` + ttstart + `` + msg.content.slice(13))
+        msg.delete(100)
+    };
+
+    if (authorizedUsers.some(user => msg.author.username.toLowerCase().includes(user.toLowerCase())) && msg.content.toLowerCase().includes("tiktok.com")) {
+        if (msg.content.toLowerCase().includes("vt.tiktok.com")){
+            return;
         }
+        const ttstart = (`https://tfx`)
+        msg.channel.send(msg.author.username + `: ` + ttstart + `` + msg.content.slice(14))
+        msg.delete(100)
+    };
+
+//	if ((msg.content.toLowerCase().includes("vt.tiktok.com")) && (msg.author.username === 'fijiwj' )) {
+//        const ttstart = (`https://tfx`)
+//        msg.channel.send(msg.author.username + `: ` + ttstart + `` + msg.content.slice(13))
+//        msg.delete(100) 
+//	}
+
+//	if ((msg.content.toLowerCase().includes("x.com")) && (msg.author.username === 'fijiwj' )) {
+//        const xstart = (`https://fxtwitter`)
+//        msg.channel.send(msg.author.username + `: ` + xstart + `` + msg.content.slice(9))
+//        msg.delete(100)
+//        }
 
 })
 
