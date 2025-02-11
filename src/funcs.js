@@ -2,10 +2,10 @@ const fs = require('fs');
 const path = require('path');
 
 
-// Путь к файлу с предложениями
+// path to your file with data for yapping command
 const filePath = path.join(__dirname, '..', 'src/data.log');
 
-// Функция для получения случайного элемента из массива
+// get random element
 function getRandomElement(array) {
     if (!array || array.length === 0) {
         return null;
@@ -13,7 +13,7 @@ function getRandomElement(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-function getVladivostokTime() {
+function getVladivostokTime() { // get local time
     const now = new Date();
     const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
     const vladivostokOffset = 10 * 60 * 60000; 
@@ -21,10 +21,10 @@ function getVladivostokTime() {
     return vladivostokTime.toLocaleString('ru-RU', { timeZone: 'Asia/Vladivostok' });
 }
 
-// Основная функция для получения случайных слов
+// getting randow words
 function getRandomWord(numWords = 1, retryOnError = true) {
     return new Promise((resolve, reject) => {
-        // Чтение файла и обработка данных
+        // read file
         fs.readFile(filePath, 'utf8', (err, data) => {
             if (err) {
                 reject('Ошибка при чтении файла: ' + err);
@@ -57,11 +57,10 @@ function getRandomWord(numWords = 1, retryOnError = true) {
                 return;
             }
 
-            // Проверка, что в предложении достаточно слов
+            // check if enough words
             if (words.length < numWords) {
-                if (retryOnError) {
-                    //console.warn(`В предложении недостаточно слов. Нужно ${numWords}, доступно ${words.length}. Пробуем снова...`);
-                    // Рекурсивно вызываем функцию снова
+                if (retryOnError) { // retry if error
+                    //console.warn(`В предложении недостаточно слов. Нужно ${numWords}, доступно ${words.length}. Пробуем снова...`); // remove "//" so it will send warning to console after every check
                     resolve(getRandomWord(numWords, retryOnError));
                 } else {
                     reject(`В предложении недостаточно слов. Нужно ${numWords}, доступно ${words.length}.`);
@@ -69,16 +68,18 @@ function getRandomWord(numWords = 1, retryOnError = true) {
                 return;
             }
 
-            // Выбор случайной начальной позиции
+            // choose random min number
             const startIndex = Math.floor(Math.random() * (words.length - numWords + 1));
 
-            // Выбор нескольких слов подряд
+            // choose couple words
             const selectedWords = words.slice(startIndex, startIndex + numWords).join(' ');
 
             resolve(selectedWords);
         });
     });
 }
+
+
 
 module.exports = getVladivostokTime;
 module.exports = getRandomWord;

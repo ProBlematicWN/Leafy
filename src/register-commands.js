@@ -1,6 +1,8 @@
 require('dotenv').config();
 const { REST, Routes, ApplicationCommandOptionType} = require('discord.js');
 
+// node src/register-commands.js IN ROOT FOLDER TO REGISTER SLASH-COMMANDS
+
 const commands = [
     {
         name: 'test',
@@ -66,4 +68,3 @@ const rest = new REST ({ version: '10'}).setToken(process.env.TOKEN);
     console.log((`There was an error ${error}`));
  }
 })();
-

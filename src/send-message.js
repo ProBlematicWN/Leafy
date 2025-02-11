@@ -3,6 +3,8 @@ const { Client, IntentsBitField, ButtonStyle, ButtonBuilder } = require('discord
 const getVladivostokTime = require('./vladivostokTime');
 const { ActionRowBuilder } = require('discord.js');
 
+// test file to create message with some buttons and logout
+
 const client = new Client({
     intents: [
         IntentsBitField.Flags.Guilds,
