@@ -11,14 +11,6 @@ const commands = [
     {
         name: 'yap',
         description: 'yap some shit',
-        options: [
-            {
-                name: 'amount',
-                description: 'amount of words',
-                type: ApplicationCommandOptionType.Number,
-                required: true,
-            }
-        ]
     },
     {
         name: 'time',

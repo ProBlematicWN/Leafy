@@ -9,10 +9,8 @@ const getRandomWord = require('./funcs'); // yapping command function
 var fs = require('fs');
 let isFunctionEnabled = true; // true if you want to launch bot with acces to screenshot command
 
-function getRandomInt(min, max) {
-    const minCeiled = Math.ceil(min);
-    const maxFloored = Math.floor(max);
-    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+function getRandomInt() {
+    return Math.floor(Math.random() * 4) + 1;
   }
 
 function takeScreenshot(filename) {  // main screenshot function
@@ -128,8 +126,9 @@ client.on('interactionCreate', (interaction) => {
     }
 
     if (interaction.commandName == 'yap') { // yapping command
-        const amount = interaction.options.get('amount').value
-        if (amount > 6) {
+        //const amount = interaction.options.get('amount').value
+        const amount = getRandomInt();
+        if (amount > 7) {
             interaction.reply('слишком много слов выбрано')
             return;
         }
