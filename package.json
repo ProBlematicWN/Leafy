@@ -11,6 +11,7 @@
   "description": "",
   "dependencies": {
     "audic": "^3.0.2",
+    "canvas": "^3.1.0",
     "discord.js": "^14.17.3",
     "dotenv": "^16.4.7",
     "html2canvas": "^1.4.1",

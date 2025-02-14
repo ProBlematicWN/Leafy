@@ -5,12 +5,24 @@ const path = require('path');
 const screenshotsDir = path.join(__dirname, 'screenshots'); // path for screenshots
 const screenshot = require('screenshot-desktop'); // screenshot library
 const getRandomWord = require('./funcs'); // yapping command function
+const generate = require('./funcs');
+const procc = require('./funcs');
+const { createCanvas, loadImage } = require('canvas');
+
+var randomProperty = function (obj) {
+    var keys = Object.keys(obj);
+    return keys[Math.round(Math.random() * keys.length - 1)]
+};
 
 var fs = require('fs');
+dictionary = JSON.parse(fs.readFileSync('./src/data.json', 'utf8'))
+
+
+
 let isFunctionEnabled = true; // true if you want to launch bot with acces to screenshot command
 
 function getRandomInt() {
-    return Math.floor(Math.random() * 4) + 1;
+    return Math.floor(Math.random() * 10) + 1;
   }
 
 function takeScreenshot(filename) {  // main screenshot function
@@ -25,6 +37,51 @@ function takeScreenshot(filename) {  // main screenshot function
                 reject(error);
             });
     });
+}
+
+async function addTextToImage(text) {
+  try {
+    const canvas = createCanvas(800, 600); // Укажите размеры холста
+    const ctx = canvas.getContext('2d');
+    outputPath = './src/output.png'
+    randompic = Math.floor(Math.random() * 6) + 1;
+
+    // Загрузите изображение
+    const img = await loadImage('./src/templates/' + randompic + `.png`);
+
+    // Нарисуйте изображение на холсте
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Растягиваем изображение на весь холст
+
+    // Настройки текста
+    ctx.font = 'bold 70px Arial'; // Шрифт и размер
+    ctx.fillStyle = 'white'; // Цвет текста
+    ctx.textAlign = 'center'; // Выравнивание текста по центру
+
+    // Позиция текста: посередине снизу
+    var bottomOffset = 50
+    const textX = canvas.width / 2; // Центр по горизонтали
+    const textY = canvas.height - bottomOffset; // Отступ снизу
+
+    // Добавьте текст на холст
+    ctx.fillText(text, textX, textY);
+
+    // Сохраните результат в файл
+    const out = fs.createWriteStream(outputPath);
+    const stream = canvas.createPNGStream();
+    stream.pipe(out);
+
+    return new Promise((resolve, reject) => {
+      out.on('finish', () => {
+        console.log(`Изображение сохранено как ${outputPath}`);
+        resolve();
+      });
+      out.on('error', (err) => {
+        reject(err);
+      });
+    });
+  } catch (err) {
+    console.error('Ошибка:', err);
+  }
 }
 
 const client = new Client({
@@ -46,6 +103,7 @@ const phrases = [ // "beggar" emoji reply trigger phrases
 const authorizedUsers = [ // users with special acces to some commands
     "fijiwj",
     "16x9",
+    "lordkekyshka",
 ]
 
 client.on('ready', (c) => {
@@ -53,6 +111,27 @@ client.on('ready', (c) => {
 });
 
 client.on('messageCreate', (msg) => { // commands area, not the slash ones
+
+    words = msg.content.replace(/<@([0-9])\w+>/,"").replace(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/,"").replace(/[.,]/g, " ").replace(/\s+/g, " ").split(" ") //god forgive me for this line :pray:
+    for(i = 0; i < words.length; i++){
+        if(words[i+1]){  
+            currentWord = words[i].toLowerCase();
+            nextWord = words[i+1].toLowerCase();
+            if(!Object.hasOwn(dictionary, currentWord)){
+                dictionary[currentWord] = []
+            }
+            if(!dictionary[currentWord].includes(nextWord)){
+                dictionary[currentWord].push(nextWord);
+            }
+        }
+    }
+
+    if ((msg.content != "Processing...") || (msg.author.username != "Leafy"))  { // avoid getting bot's replies in data file required for yapping command
+            fs.appendFileSync('src/data.log', msg.content + `\n`);
+        }
+
+   // result.value = JSON.stringify(dictionary, undefined, " ")
+    fs.writeFileSync('src/data.json', JSON.stringify(dictionary, undefined, " "))
 
     console.log(`${msg.author.username} - ${msg.content}`) // simple messages log in terminal
     fs.appendFileSync('src/debug.log', (`${msg.author.username} - ${msg.content}`)+`\n`); // logging in file
@@ -63,10 +142,6 @@ client.on('messageCreate', (msg) => { // commands area, not the slash ones
 
     if (msg.content === "") { // can't actually remember what is, too afraid to delete
         return;
-    }
-
-    if ((msg.content != "l.b") || (msg.author.username != "Leafy"))  { // avoid getting bot's replies in data file required for yapping command
-        fs.appendFileSync('src/data.log', msg.content + `\n`);
     }
 
     if ((msg.content.toLowerCase().includes("кув")) && (msg.author.username === 'fijiwj')) { // ping with wrong layout
@@ -116,30 +191,83 @@ client.on('messageCreate', (msg) => { // commands area, not the slash ones
 
 })
 
-client.on('interactionCreate', (interaction) => {
+client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
     
     console.log(`${interaction.user.username} issued command "${interaction.commandName}"`); // interactions logging
 
     if (interaction.commandName == 'test') { // simple test slash-command, you can use as template
-        interaction.reply('test')
-    }
+       interaction.reply('test')
+    }  
+    
+    if (interaction.commandName == 'yappic') {
+    try {
+        // defering reply
+        await interaction.reply('Processing...');
 
-    if (interaction.commandName == 'yap') { // yapping command
-        //const amount = interaction.options.get('amount').value
-        const amount = getRandomInt();
-        if (amount > 7) {
-            interaction.reply('слишком много слов выбрано')
-            return;
+        //var n = getRandomInt();
+        var n = 1;
+
+        words = []
+        words[0] = randomProperty(dictionary)
+        for(i = 0; i < n; i++){
+            if(words[i].includes("<@")){
+                continue
+            }
+            childWords = dictionary[words[words.length-1]]
+            if(!childWords){
+                console.log(words)
+                break
+            }
+            words.push(childWords[Math.floor(Math.random() * childWords.length)]);
         }
-        getRandomWord(amount) // insert amount of words here (1 word as default)
-            .then((words) => {
-                interaction.reply(words);
-            })
-            .catch((error) => {
-                console.error('Ошибка:', error);
-            });
+        var imagetext = (words.join(" ").slice(0,2000))
+
+        //const imagetext = 'text';
+        const filenamepic = './src/output.png';
+
+        // Гgenerating image
+        await addTextToImage(imagetext);
+
+        // sending file
+        await interaction.editReply({ files: [filenamepic] });
+
+        // delete file (if need)
+        // fs.unlinkSync(filenamepic);
+    } catch (error) {
+        console.error(error)
     }
+} 
+    
+    if (authorizedUsers.some(user => interaction.user.username.toLowerCase().includes(user.toLowerCase())) && interaction.commandName == 'yap') {
+        
+    //if ((interaction.commandName == 'yap') && (interaction.user.username == (('fijiwj') || ('16x9')))) {
+
+
+        var n = interaction.options.get('word-amount')
+        
+        if (!n) {
+           n = getRandomInt(); 
+        }
+        else {
+            n = n.value
+        }
+
+        words = []
+        words[0] = randomProperty(dictionary)
+        for(i = 0; i < n; i++){
+            if(words[i].includes("<@")){
+                continue
+            }
+            childWords = dictionary[words[words.length-1]]
+            if(!childWords){
+                console.log(words)
+                break
+            }
+            words.push(childWords[Math.floor(Math.random() * childWords.length)]);
+        }
+        interaction.reply(words.join(" ").slice(0,2000))
+        }
 
     if (interaction.commandName == 'time') { // current time 
         const timestamp = Date.now();
@@ -147,6 +275,8 @@ client.on('interactionCreate', (interaction) => {
         //interaction.reply(`сейчас у проба ${getVladivostokTime()}`) // previous version, doesn't work for me anymore (idk why)
         interaction.reply(`сейчас у проба <t:${slicetime}:f>`)
     }
+
+
 
     if (interaction.commandName == 'add') { // simple add command, use as template for interaction options
         const num1 = interaction.options.get('first-number').value
@@ -169,10 +299,12 @@ client.on('interactionCreate', (interaction) => {
             const slicetime = timestamp.toString().slice(0, 10);
             const filename = path.join(screenshotsDir, `screenshot-${timestamp}.png`);
         
-            takeScreenshot(filename)
+            await interaction.reply('Processing...')
+
+            await takeScreenshot(filename)
                 .then(() => {
                     //interaction.reply({content: `${getVladivostokTime()}`, files: [filename] }) // old version
-                    interaction.reply({content: `<t:${slicetime}:f> `, files: [filename] })
+                    interaction.editReply({content: `<t:${slicetime}:f> `, files: [filename] })
                         .then(() => {
                             // fs.unlinkSync(filename); // delete "//" if you want to screenshot being deleted after using command
                         })
@@ -182,11 +314,11 @@ client.on('interactionCreate', (interaction) => {
                 })
                 .catch((error) => {
                     console.error('Ошибка при создании скриншота:', error);
-                    interaction.reply({ content: 'Произошла ошибка при создании скриншота!', flags: 64 }); // flags: 64 so this error message will see only the user, who issued command
+                    interaction.editReply({ content: 'Произошла ошибка при создании скриншота!', flags: 64 }); // flags: 64 so this error message will see only the user, who issued command
                 });
         }
         if (!isFunctionEnabled) {
-            interaction.reply('<:stop:1338512349455319111> Функция недоступна т.к. выключена ') // if toggle-screenshot turned off
+           await interaction.reply('<:stop:1338512349455319111> Функция недоступна т.к. выключена ') // if toggle-screenshot turned off
         }
     }
 })

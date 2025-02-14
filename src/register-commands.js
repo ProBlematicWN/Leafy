@@ -9,9 +9,22 @@ const commands = [
         description: 'replies with test',
     },
     {
+        name: 'yappic',
+        description: 'replies with yap picture',
+    },
+    {
         name: 'yap',
         description: 'yap some shit',
+        options: [
+            {
+                name: 'word-amount',
+                description: 'amount of words yapped',
+                type: ApplicationCommandOptionType.Number,
+                required: false,
+            }
+        ]
     },
+    
     {
         name: 'time',
         description: 'а сколько время у проба?',
