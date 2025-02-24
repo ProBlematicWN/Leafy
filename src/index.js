@@ -1,5 +1,5 @@
 require('dotenv').config(); // create .env file with your tokens and other stuff
-const { Client, IntentsBitField } = require('discord.js'); // discord library
+const { Client, IntentsBitField, AttachmentBuilder } = require('discord.js'); // discord library
 const getVladivostokTime = require('./funcs'); // function to get local time (vladivostok one in my case)
 const path = require('path'); 
 const screenshotsDir = path.join(__dirname, 'screenshots'); // path for screenshots
@@ -7,7 +7,8 @@ const screenshot = require('screenshot-desktop'); // screenshot library
 const getRandomWord = require('./funcs'); // yapping command function
 const generate = require('./funcs');
 const procc = require('./funcs');
-const { createCanvas, loadImage } = require('canvas');
+//const { createCanvas, loadImage } = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 
 var randomProperty = function (obj) {
     var keys = Object.keys(obj);
@@ -40,14 +41,12 @@ function takeScreenshot(filename) {  // main screenshot function
 }
 
 async function addTextToImage(text) {
-  try {
-    const canvas = createCanvas(800, 600); // Укажите размеры холста
+    const canvas = Canvas.createCanvas(800, 600); // Укажите размеры холста
     const ctx = canvas.getContext('2d');
-    outputPath = './src/output.png'
     randompic = Math.floor(Math.random() * 6) + 1;
 
     // Загрузите изображение
-    const img = await loadImage('./src/templates/' + randompic + `.png`);
+    const img = await Canvas.loadImage('./src/templates/' + randompic + `.png`);
 
     // Нарисуйте изображение на холсте
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Растягиваем изображение на весь холст
@@ -65,23 +64,8 @@ async function addTextToImage(text) {
     // Добавьте текст на холст
     ctx.fillText(text, textX, textY);
 
-    // Сохраните результат в файл
-    const out = fs.createWriteStream(outputPath);
-    const stream = canvas.createPNGStream();
-    stream.pipe(out);
-
-    return new Promise((resolve, reject) => {
-      out.on('finish', () => {
-        console.log(`Изображение сохранено как ${outputPath}`);
-        resolve();
-      });
-      out.on('error', (err) => {
-        reject(err);
-      });
-    });
-  } catch (err) {
-    console.error('Ошибка:', err);
-  }
+    attachment = new AttachmentBuilder(await canvas.encode('png'), { name: 'profile-image.png' });
+    return attachment    
 }
 
 const client = new Client({
@@ -202,9 +186,6 @@ client.on('interactionCreate', async (interaction) => {
     
     if (interaction.commandName == 'yappic') {
     try {
-        // defering reply
-        await interaction.reply('Processing...');
-
         //var n = getRandomInt();
         var n = 1;
 
@@ -223,17 +204,9 @@ client.on('interactionCreate', async (interaction) => {
         }
         var imagetext = (words.join(" ").slice(0,2000))
 
-        //const imagetext = 'text';
-        const filenamepic = './src/output.png';
+        attachment = await addTextToImage(imagetext)
 
-        // Гgenerating image
-        await addTextToImage(imagetext);
-
-        // sending file
-        await interaction.editReply({ files: [filenamepic] });
-
-        // delete file (if need)
-        // fs.unlinkSync(filenamepic);
+        interaction.reply({ files: [attachment] });
     } catch (error) {
         console.error(error)
     }
@@ -275,8 +248,10 @@ client.on('interactionCreate', async (interaction) => {
         //interaction.reply(`сейчас у проба ${getVladivostokTime()}`) // previous version, doesn't work for me anymore (idk why)
         interaction.reply(`сейчас у проба <t:${slicetime}:f>`)
     }
-
-
+    
+    if (interaction.commandName == 'goon') { // goon
+        goon(interaction)
+    }
 
     if (interaction.commandName == 'add') { // simple add command, use as template for interaction options
         const num1 = interaction.options.get('first-number').value
