@@ -1,0 +1,30 @@
+{
+  "name": "leafy",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.67",
+    "audic": "^3.0.2",
+    "canvas": "^3.1.0",
+    "discord.js": "^14.17.3",
+    "dotenv": "^16.4.7",
+    "html2canvas": "^1.4.1",
+    "jimp": "^1.6.0",
+    "napi-rs": "^0.3.10",
+    "play": "^0.5.0",
+    "play-sound": "^1.1.6",
+    "screenshot-desktop": "^1.15.1",
+    "sound-play": "^1.1.0",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "font-face": "^2.3.4"
+  }
+}
